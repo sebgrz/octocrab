@@ -1,10 +1,13 @@
 //! Get data about the currently authenticated user.
 
+mod create;
+
 use crate::{
     models::{self, Repository},
     Octocrab, Page, Result,
 };
 use chrono::{DateTime, Utc};
+pub use create::CreateUserRepositoryBuilder;
 
 /// Handler for the current authenication API. **Note** All of the methods
 /// provided below require at least some authenication such as personal token
@@ -42,6 +45,23 @@ impl<'octo> CurrentAuthHandler<'octo> {
     /// ```
     pub async fn app(&self) -> Result<models::App> {
         self.crab.get("app", None::<&()>).await
+    }
+
+    /// Create a repository for the authenticated user
+    /// ```no_run
+    /// # use reqwest::Response;
+    ///  async fn run() -> octocrab::Result<()> {
+    /// octocrab::instance()
+    ///     .current()
+    ///     .create_repo("rust")
+    ///     .description("Description")
+    ///     .private(true)
+    ///     .send()
+    ///     .await
+    /// # }
+    /// ```
+    pub fn create_repo(&self, name: &str) -> CreateUserRepositoryBuilder<'_, '_> {
+        CreateUserRepositoryBuilder::new(self, name)
     }
 
     /// List repositories starred by current authenticated user.
